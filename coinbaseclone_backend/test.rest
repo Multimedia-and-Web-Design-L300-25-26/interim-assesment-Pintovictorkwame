@@ -1,0 +1,208 @@
+### ============================================================
+### COINBASE CLONE API — REST Client Test File
+### Install "REST Client" VS Code extension to run these
+### ============================================================
+
+@base = http://localhost:5000
+@contentType = application/json
+
+
+### ============================================================
+### HEALTH CHECK
+### ============================================================
+
+GET {{base}}/
+Content-Type: {{contentType}}
+
+
+### ============================================================
+### AUTH — REGISTER
+### ============================================================
+
+POST {{base}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "name": "Alice Johnson",
+  "email": "alice@example.com",
+  "password": "password123"
+}
+
+###
+
+### Register admin (manually set role in DB after registering)
+POST {{base}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "name": "Admin User",
+  "email": "admin@example.com",
+  "password": "adminpassword123"
+}
+
+
+### ============================================================
+### AUTH — LOGIN
+### ============================================================
+
+POST {{base}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "alice@example.com",
+  "password": "password123"
+}
+
+###
+
+### Login as admin
+POST {{base}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@example.com",
+  "password": "adminpassword123"
+}
+
+
+### ============================================================
+### AUTH — PROFILE (protected)
+### Requires cookie from login — works automatically in REST Client
+### ============================================================
+
+GET {{base}}/api/auth/profile
+Content-Type: {{contentType}}
+
+
+### ============================================================
+### AUTH — LOGOUT
+### ============================================================
+
+POST {{base}}/api/auth/logout
+Content-Type: {{contentType}}
+
+
+### ============================================================
+### CRYPTO — GET ALL (public, paginated)
+### ============================================================
+
+GET {{base}}/api/crypto
+Content-Type: {{contentType}}
+
+###
+
+### With pagination
+GET {{base}}/api/crypto?page=1&limit=5
+Content-Type: {{contentType}}
+
+
+### ============================================================
+### CRYPTO — TOP GAINERS
+### ============================================================
+
+GET {{base}}/api/crypto/gainers
+Content-Type: {{contentType}}
+
+###
+
+### Top 5 gainers
+GET {{base}}/api/crypto/gainers?limit=5
+Content-Type: {{contentType}}
+
+
+### ============================================================
+### CRYPTO — NEWEST COINS
+### ============================================================
+
+GET {{base}}/api/crypto/new
+Content-Type: {{contentType}}
+
+###
+
+### Newest 3 coins
+GET {{base}}/api/crypto/new?limit=3
+Content-Type: {{contentType}}
+
+
+### ============================================================
+### CRYPTO — ADD (admin only, requires login as admin first)
+### ============================================================
+
+POST {{base}}/api/crypto
+Content-Type: {{contentType}}
+
+{
+  "name": "Bitcoin",
+  "symbol": "BTC",
+  "price": 65000,
+  "image": "https://example.com/btc.png",
+  "change24h": 2.5
+}
+
+###
+
+POST {{base}}/api/crypto
+Content-Type: {{contentType}}
+
+{
+  "name": "Ethereum",
+  "symbol": "ETH",
+  "price": 3200,
+  "image": "https://example.com/eth.png",
+  "change24h": -1.2
+}
+
+###
+
+POST {{base}}/api/crypto
+Content-Type: {{contentType}}
+
+{
+  "name": "Solana",
+  "symbol": "SOL",
+  "price": 150,
+  "image": "https://example.com/sol.png",
+  "change24h": 5.8
+}
+
+###
+
+### Test validation — missing fields
+POST {{base}}/api/crypto
+Content-Type: {{contentType}}
+
+{
+  "name": "BrokenCoin"
+}
+
+
+### ============================================================
+### ERROR CASES
+### ============================================================
+
+### Register duplicate user
+POST {{base}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "name": "Alice Again",
+  "email": "alice@example.com",
+  "password": "password123"
+}
+
+###
+
+### Login with wrong password
+POST {{base}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "alice@example.com",
+  "password": "wrongpassword"
+}
+
+###
+
+### Access profile without auth
+GET {{base}}/api/auth/profile
+Content-Type: {{contentType}}
