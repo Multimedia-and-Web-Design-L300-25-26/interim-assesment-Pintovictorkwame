@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
           if (data.success) setUser(data.user);
         }
       } catch {
-        // backend not running or not authenticated
+        // not authenticated
       } finally {
         setLoading(false);
       }
@@ -48,6 +48,7 @@ export const AuthProvider = ({ children }) => {
     });
     const data = await res.json();
     if (!data.success) throw new Error(data.message);
+    setUser(data.user);
     return data;
   };
 
@@ -58,7 +59,7 @@ export const AuthProvider = ({ children }) => {
         credentials: 'include',
       });
     } catch {
-      // ignore
+      // silently fail
     }
     setUser(null);
   };

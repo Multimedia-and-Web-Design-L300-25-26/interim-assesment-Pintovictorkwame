@@ -10,10 +10,7 @@ const NavigationDropdown = ({ activeMenu }) => {
     return (
         <div className="absolute top-full left-0 w-full bg-white border-b border-gray-100 shadow-xl z-40 transition-all duration-300 ease-in-out font-inter flex justify-center">
             <div className="max-w-[1440px] w-full px-6 py-8 flex gap-12">
-                {/* Main Menu Links Area */}
                 <div className="flex-grow">
-
-                    {/* Flat List (e.g. Individuals, Businesses, Company) */}
                     {menuData.items && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
                             {menuData.items.map((item) => (
@@ -29,7 +26,6 @@ const NavigationDropdown = ({ activeMenu }) => {
                         </div>
                     )}
 
-                    {/* Sectioned List (e.g. Institutions, Developers) */}
                     {menuData.sections && (
                         <div className="flex flex-row gap-16">
                             {menuData.sections.map((section) => (
@@ -55,7 +51,6 @@ const NavigationDropdown = ({ activeMenu }) => {
                     )}
                 </div>
 
-                {/* Feature Side Card */}
                 {menuData.feature_card && (
                     <div className="w-[320px] bg-[#F4F6F8] rounded-[16px] shrink-0 flex flex-col overflow-hidden">
                         {menuData.feature_card.image && (

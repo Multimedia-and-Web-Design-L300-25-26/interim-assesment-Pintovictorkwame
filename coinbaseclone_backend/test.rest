@@ -1,208 +1,322 @@
-### ============================================================
-### COINBASE CLONE API — REST Client Test File
-### Install "REST Client" VS Code extension to run these
-### ============================================================
-
 @base = http://localhost:5000
-@contentType = application/json
 
+# ─────────────────────────────────────────────
+# AUTH
+# ─────────────────────────────────────────────
 
-### ============================================================
-### HEALTH CHECK
-### ============================================================
-
-GET {{base}}/
-Content-Type: {{contentType}}
-
-
-### ============================================================
-### AUTH — REGISTER
-### ============================================================
-
+### Register a new user
 POST {{base}}/api/auth/register
-Content-Type: {{contentType}}
+Content-Type: application/json
 
 {
-  "name": "Alice Johnson",
-  "email": "alice@example.com",
+  "name": "Test User",
+  "email": "test@example.com",
   "password": "password123"
 }
 
 ###
 
-### Register admin (manually set role in DB after registering)
-POST {{base}}/api/auth/register
-Content-Type: {{contentType}}
-
-{
-  "name": "Admin User",
-  "email": "admin@example.com",
-  "password": "adminpassword123"
-}
-
-
-### ============================================================
-### AUTH — LOGIN
-### ============================================================
-
+### Login
 POST {{base}}/api/auth/login
-Content-Type: {{contentType}}
+Content-Type: application/json
 
 {
-  "email": "alice@example.com",
+  "email": "test@example.com",
   "password": "password123"
 }
 
 ###
 
-### Login as admin
-POST {{base}}/api/auth/login
-Content-Type: {{contentType}}
-
-{
-  "email": "admin@example.com",
-  "password": "adminpassword123"
-}
-
-
-### ============================================================
-### AUTH — PROFILE (protected)
-### Requires cookie from login — works automatically in REST Client
-### ============================================================
-
+### Get profile (requires cookie from login)
 GET {{base}}/api/auth/profile
-Content-Type: {{contentType}}
 
+###
 
-### ============================================================
-### AUTH — LOGOUT
-### ============================================================
+### Promote to admin (requires cookie from login)
+POST {{base}}/api/auth/make-admin
 
+###
+
+### Logout
 POST {{base}}/api/auth/logout
-Content-Type: {{contentType}}
 
+# ─────────────────────────────────────────────
+# SEED — bulk insert all cryptos at once
+# Run this if the database is empty.
+# Safe to call multiple times (no-op if data exists).
+# ─────────────────────────────────────────────
 
-### ============================================================
-### CRYPTO — GET ALL (public, paginated)
-### ============================================================
+### Seed all cryptocurrencies
+POST {{base}}/api/crypto/seed
 
-GET {{base}}/api/crypto
-Content-Type: {{contentType}}
+# ─────────────────────────────────────────────
+# CRYPTO — read endpoints
+# ─────────────────────────────────────────────
 
-###
-
-### With pagination
-GET {{base}}/api/crypto?page=1&limit=5
-Content-Type: {{contentType}}
-
-
-### ============================================================
-### CRYPTO — TOP GAINERS
-### ============================================================
-
-GET {{base}}/api/crypto/gainers
-Content-Type: {{contentType}}
+### Get all cryptos (page 1, 20 per page)
+GET {{base}}/api/crypto?page=1&limit=20
 
 ###
 
-### Top 5 gainers
-GET {{base}}/api/crypto/gainers?limit=5
-Content-Type: {{contentType}}
-
-
-### ============================================================
-### CRYPTO — NEWEST COINS
-### ============================================================
-
-GET {{base}}/api/crypto/new
-Content-Type: {{contentType}}
+### Get top gainers
+GET {{base}}/api/crypto/gainers?limit=10
 
 ###
 
-### Newest 3 coins
-GET {{base}}/api/crypto/new?limit=3
-Content-Type: {{contentType}}
+### Get newest listings
+GET {{base}}/api/crypto/new?limit=10
 
+# ─────────────────────────────────────────────
+# ADD INDIVIDUAL CRYPTOS
+# Requires admin cookie — login + make-admin first.
+# ─────────────────────────────────────────────
 
-### ============================================================
-### CRYPTO — ADD (admin only, requires login as admin first)
-### ============================================================
-
+### Bitcoin
 POST {{base}}/api/crypto
-Content-Type: {{contentType}}
+Content-Type: application/json
 
 {
   "name": "Bitcoin",
   "symbol": "BTC",
-  "price": 65000,
-  "image": "https://example.com/btc.png",
-  "change24h": 2.5
+  "price": 65420.18,
+  "change24h": 2.34,
+  "image": "/assets/images/bitcoin.svg"
 }
 
 ###
 
+### Ethereum
 POST {{base}}/api/crypto
-Content-Type: {{contentType}}
+Content-Type: application/json
 
 {
   "name": "Ethereum",
   "symbol": "ETH",
-  "price": 3200,
-  "image": "https://example.com/eth.png",
-  "change24h": -1.2
+  "price": 3218.44,
+  "change24h": -1.12,
+  "image": "/assets/images/ethereum.svg"
 }
 
 ###
 
+### Tether
 POST {{base}}/api/crypto
-Content-Type: {{contentType}}
+Content-Type: application/json
+
+{
+  "name": "Tether",
+  "symbol": "USDT",
+  "price": 1.0,
+  "change24h": 0.01,
+  "image": "/assets/images/tether.svg"
+}
+
+###
+
+### BNB
+POST {{base}}/api/crypto
+Content-Type: application/json
+
+{
+  "name": "BNB",
+  "symbol": "BNB",
+  "price": 412.3,
+  "change24h": 0.48,
+  "image": "/assets/images/BNB.png"
+}
+
+###
+
+### Solana
+POST {{base}}/api/crypto
+Content-Type: application/json
 
 {
   "name": "Solana",
   "symbol": "SOL",
-  "price": 150,
-  "image": "https://example.com/sol.png",
-  "change24h": 5.8
+  "price": 152.87,
+  "change24h": 5.76,
+  "image": "/assets/images/Solana.png"
 }
 
 ###
 
-### Test validation — missing fields
+### XRP
 POST {{base}}/api/crypto
-Content-Type: {{contentType}}
+Content-Type: application/json
 
 {
-  "name": "BrokenCoin"
-}
-
-
-### ============================================================
-### ERROR CASES
-### ============================================================
-
-### Register duplicate user
-POST {{base}}/api/auth/register
-Content-Type: {{contentType}}
-
-{
-  "name": "Alice Again",
-  "email": "alice@example.com",
-  "password": "password123"
+  "name": "XRP",
+  "symbol": "XRP",
+  "price": 0.5823,
+  "change24h": -2.11,
+  "image": "/assets/images/XRP.png"
 }
 
 ###
 
-### Login with wrong password
-POST {{base}}/api/auth/login
-Content-Type: {{contentType}}
+### USD Coin
+POST {{base}}/api/crypto
+Content-Type: application/json
 
 {
-  "email": "alice@example.com",
-  "password": "wrongpassword"
+  "name": "USD Coin",
+  "symbol": "USDC",
+  "price": 1.0,
+  "change24h": 0.02,
+  "image": "/assets/images/usdc.svg"
 }
 
 ###
 
-### Access profile without auth
-GET {{base}}/api/auth/profile
-Content-Type: {{contentType}}
+### Cardano
+POST {{base}}/api/crypto
+Content-Type: application/json
+
+{
+  "name": "Cardano",
+  "symbol": "ADA",
+  "price": 0.4521,
+  "change24h": 1.05,
+  "image": "/assets/images/Cardano.png"
+}
+
+###
+
+### Avalanche
+POST {{base}}/api/crypto
+Content-Type: application/json
+
+{
+  "name": "Avalanche",
+  "symbol": "AVAX",
+  "price": 38.74,
+  "change24h": 3.21,
+  "image": "/assets/images/Avalanche.png"
+}
+
+###
+
+### Dogecoin
+POST {{base}}/api/crypto
+Content-Type: application/json
+
+{
+  "name": "Dogecoin",
+  "symbol": "DOGE",
+  "price": 0.1624,
+  "change24h": -0.87,
+  "image": "/assets/images/dogecoin.svg"
+}
+
+###
+
+### Cosmos
+POST {{base}}/api/crypto
+Content-Type: application/json
+
+{
+  "name": "Cosmos",
+  "symbol": "ATOM",
+  "price": 8.42,
+  "change24h": 1.93,
+  "image": ""
+}
+
+###
+
+### Polkadot
+POST {{base}}/api/crypto
+Content-Type: application/json
+
+{
+  "name": "Polkadot",
+  "symbol": "DOT",
+  "price": 7.18,
+  "change24h": -0.56,
+  "image": ""
+}
+
+###
+
+### Polygon
+POST {{base}}/api/crypto
+Content-Type: application/json
+
+{
+  "name": "Polygon",
+  "symbol": "POL",
+  "price": 0.7831,
+  "change24h": 4.12,
+  "image": ""
+}
+
+###
+
+### Chainlink
+POST {{base}}/api/crypto
+Content-Type: application/json
+
+{
+  "name": "Chainlink",
+  "symbol": "LINK",
+  "price": 14.63,
+  "change24h": 2.88,
+  "image": ""
+}
+
+###
+
+### Litecoin
+POST {{base}}/api/crypto
+Content-Type: application/json
+
+{
+  "name": "Litecoin",
+  "symbol": "LTC",
+  "price": 82.45,
+  "change24h": -1.34,
+  "image": ""
+}
+
+###
+
+### Stellar
+POST {{base}}/api/crypto
+Content-Type: application/json
+
+{
+  "name": "Stellar",
+  "symbol": "XLM",
+  "price": 0.1182,
+  "change24h": 0.73,
+  "image": ""
+}
+
+###
+
+### Uniswap
+POST {{base}}/api/crypto
+Content-Type: application/json
+
+{
+  "name": "Uniswap",
+  "symbol": "UNI",
+  "price": 9.27,
+  "change24h": 6.15,
+  "image": ""
+}
+
+###
+
+### Monero
+POST {{base}}/api/crypto
+Content-Type: application/json
+
+{
+  "name": "Monero",
+  "symbol": "XMR",
+  "price": 163.2,
+  "change24h": -0.44,
+  "image": ""
+}

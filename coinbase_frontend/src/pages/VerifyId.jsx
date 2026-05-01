@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Shield, Check, Upload, Camera, ChevronRight, X } from 'lucide-react';
+import { ArrowLeft, Shield, Check, Upload, Camera, ChevronRight, X, CreditCard, Clock } from 'lucide-react';
 
 const STEPS = [
   'intro',
@@ -192,7 +192,6 @@ const VerifyId = () => {
     <div className="min-h-screen bg-[#0A0B0D] flex flex-col items-center justify-center font-inter p-6">
       <div className="w-full max-w-[480px]">
 
-        {/* Logo */}
         {step !== 'processing' && step !== 'complete' && (
           <Link to="/" className="block mb-8">
             <img
@@ -207,7 +206,6 @@ const VerifyId = () => {
           <StepBar current={step} />
         )}
 
-        {/* ── INTRO ── */}
         {step === 'intro' && (
           <div>
             <div className="w-16 h-16 rounded-2xl bg-[#0052FF]/10 flex items-center justify-center mb-6">
@@ -222,12 +220,12 @@ const VerifyId = () => {
 
             <div className="space-y-3 mb-8">
               {[
-                { icon: '🪪', text: "Government-issued ID (passport, driver's license, or national ID)" },
-                { icon: '🤳', text: 'A selfie to match against your ID' },
-                { icon: '🕐', text: 'This usually takes 2–5 minutes' },
+                { icon: <CreditCard size={18} className="text-[#0052FF]" />, text: "Government-issued ID (passport, driver's license, or national ID)" },
+                { icon: <Camera size={18} className="text-[#0052FF]" />, text: 'A selfie to match against your ID' },
+                { icon: <Clock size={18} className="text-[#0052FF]" />, text: 'This usually takes 2–5 minutes' },
               ].map(({ icon, text }) => (
                 <div key={text} className="flex items-start gap-3">
-                  <span className="text-[20px]">{icon}</span>
+                  <span className="mt-0.5 shrink-0">{icon}</span>
                   <p className="text-[#888A8F] text-[14px] leading-relaxed">{text}</p>
                 </div>
               ))}
@@ -242,7 +240,6 @@ const VerifyId = () => {
           </div>
         )}
 
-        {/* ── PERSONAL INFO ── */}
         {step === 'personal-info' && (
           <div>
             <button onClick={() => goTo('intro')} className="flex items-center gap-2 text-[#5B616E] hover:text-white transition-colors mb-6 text-[14px] font-medium">
@@ -327,7 +324,6 @@ const VerifyId = () => {
           </div>
         )}
 
-        {/* ── CITIZENSHIP ── */}
         {step === 'citizenship' && (
           <div>
             <button onClick={() => goTo('personal-info')} className="flex items-center gap-2 text-[#5B616E] hover:text-white transition-colors mb-6 text-[14px] font-medium">
@@ -362,7 +358,6 @@ const VerifyId = () => {
           </div>
         )}
 
-        {/* ── DOC TYPE ── */}
         {step === 'doc-type' && (
           <div>
             <button onClick={() => goTo('citizenship')} className="flex items-center gap-2 text-[#5B616E] hover:text-white transition-colors mb-6 text-[14px] font-medium">
@@ -393,7 +388,6 @@ const VerifyId = () => {
           </div>
         )}
 
-        {/* ── UPLOAD FRONT ── */}
         {step === 'upload-front' && (
           <div>
             <button onClick={() => goTo('doc-type')} className="flex items-center gap-2 text-[#5B616E] hover:text-white transition-colors mb-6 text-[14px] font-medium">
@@ -428,7 +422,6 @@ const VerifyId = () => {
           </div>
         )}
 
-        {/* ── UPLOAD BACK ── */}
         {step === 'upload-back' && (
           <div>
             <button onClick={() => goTo('upload-front')} className="flex items-center gap-2 text-[#5B616E] hover:text-white transition-colors mb-6 text-[14px] font-medium">
@@ -454,7 +447,6 @@ const VerifyId = () => {
           </div>
         )}
 
-        {/* ── SELFIE ── */}
         {step === 'selfie' && (
           <div>
             <button onClick={() => goTo(selectedDoc?.hasBack ? 'upload-back' : 'upload-front')} className="flex items-center gap-2 text-[#5B616E] hover:text-white transition-colors mb-6 text-[14px] font-medium">
@@ -528,7 +520,6 @@ const VerifyId = () => {
           </div>
         )}
 
-        {/* ── PROCESSING ── */}
         {step === 'processing' && (
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
             <div className="relative mb-8">
@@ -553,7 +544,6 @@ const VerifyId = () => {
           </div>
         )}
 
-        {/* ── COMPLETE ── */}
         {step === 'complete' && (
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
             <div className="w-24 h-24 rounded-full bg-[#00D180]/15 flex items-center justify-center mb-8">

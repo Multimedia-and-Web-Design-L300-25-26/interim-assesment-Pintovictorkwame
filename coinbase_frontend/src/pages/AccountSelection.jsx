@@ -29,7 +29,6 @@ const AccountSelection = () => {
     return (
         <div className="min-h-screen bg-[#0A0B0D] flex flex-col items-center justify-center font-inter p-6">
             <div className="w-full max-w-[560px] flex flex-col">
-                {/* Logo */}
                 <Link to="/" className="mb-12 self-start">
                     <img
                         src="/assets/clone-images/coinbaseLogoNavigation-4.svg"

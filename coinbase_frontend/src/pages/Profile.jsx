@@ -3,9 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, User, Shield, CreditCard, Bell, Lock,
   ChevronRight, Check, AlertCircle, Smartphone, Key,
-  LogOut, Copy, ExternalLink,
+  LogOut, Copy, ExternalLink, Crown,
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, API_BASE } from '../context/AuthContext';
 
 const SECTIONS = [
   { id: 'profile', icon: <User size={17} />, label: 'Profile' },
@@ -106,7 +106,7 @@ const NotificationRow = ({ label, description, enabled, onToggle }) => (
 
 const Profile = () => {
   const [activeSection, setActiveSection] = useState('profile');
-  const { user, logout } = useAuth();
+  const { user, setUser, logout } = useAuth();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState({
     priceAlerts: true,
@@ -114,10 +114,34 @@ const Profile = () => {
     news: false,
     marketing: false,
   });
+  const [adminLoading, setAdminLoading] = useState(false);
+  const [adminMsg, setAdminMsg] = useState('');
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
+  };
+
+  const handleBecomeAdmin = async () => {
+    setAdminLoading(true);
+    setAdminMsg('');
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/make-admin`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (data.success) {
+        setUser(data.user);
+        setAdminMsg('You are now an admin! You can add cryptocurrencies on the Explore page.');
+      } else {
+        setAdminMsg(data.message || 'Something went wrong.');
+      }
+    } catch {
+      setAdminMsg('Could not reach the server.');
+    } finally {
+      setAdminLoading(false);
+    }
   };
 
   const toggleNotif = (key) => setNotifications((n) => ({ ...n, [key]: !n[key] }));
@@ -132,7 +156,6 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 font-inter">
-      {/* Top nav */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-4">
         <Link
           to="/dashboard"
@@ -149,7 +172,52 @@ const Profile = () => {
 
       <div className="max-w-[900px] mx-auto px-6 py-8">
 
-        {/* Profile header card */}
+        {user?.role !== 'admin' ? (
+          <div className="bg-gradient-to-r from-[#0052FF] to-[#7B2FFF] rounded-2xl p-5 mb-6 flex flex-col sm:flex-row items-center gap-4 shadow-lg">
+            <div className="flex items-center gap-3 flex-1">
+              <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                <Crown size={22} className="text-white" />
+              </div>
+              <div>
+                <p className="text-white font-bold text-[16px]">Examiner / Tester Access</p>
+                <p className="text-white/80 text-[13px]">Click the button to become an admin and unlock the ability to add cryptocurrencies on the Explore page.</p>
+              </div>
+            </div>
+            <button
+              onClick={handleBecomeAdmin}
+              disabled={adminLoading}
+              className="shrink-0 bg-white text-[#0052FF] font-bold px-6 py-3 rounded-full text-[14px] hover:bg-gray-100 transition-colors disabled:opacity-60 flex items-center gap-2 shadow-md"
+            >
+              {adminLoading ? (
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              ) : (
+                <Crown size={16} />
+              )}
+              {adminLoading ? 'Upgrading…' : 'Become Admin'}
+            </button>
+          </div>
+        ) : (
+          <div className="bg-gradient-to-r from-[#05B169] to-[#00875A] rounded-2xl p-5 mb-6 flex items-center gap-4 shadow-md">
+            <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+              <Crown size={22} className="text-white" />
+            </div>
+            <div>
+              <p className="text-white font-bold text-[16px]">Admin Access Active</p>
+              <p className="text-white/80 text-[13px]">You can add new cryptocurrencies from the Explore page.</p>
+            </div>
+            <span className="ml-auto bg-white/20 text-white text-[12px] font-bold px-3 py-1.5 rounded-full">ADMIN</span>
+          </div>
+        )}
+
+        {adminMsg && (
+          <div className="mb-6 px-5 py-4 rounded-2xl bg-[#0052FF]/10 border border-[#0052FF]/20 text-[#0052FF] text-[14px] font-medium">
+            {adminMsg}
+          </div>
+        )}
+
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6 flex items-center gap-5">
           <div className="relative">
             <div className="w-16 h-16 rounded-full bg-[#0052FF] flex items-center justify-center text-white text-[22px] font-bold">
@@ -179,7 +247,6 @@ const Profile = () => {
         </div>
 
         <div className="flex gap-6">
-          {/* Sidebar */}
           <aside className="w-[200px] shrink-0">
             <nav className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
               {SECTIONS.map((s) => (
@@ -199,10 +266,7 @@ const Profile = () => {
             </nav>
           </aside>
 
-          {/* Main content */}
           <div className="flex-1 min-w-0">
-
-            {/* ── PROFILE SECTION ── */}
             {activeSection === 'profile' && (
               <div className="space-y-5">
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -279,7 +343,6 @@ const Profile = () => {
               </div>
             )}
 
-            {/* ── SECURITY SECTION ── */}
             {activeSection === 'security' && (
               <div className="space-y-5">
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -356,7 +419,6 @@ const Profile = () => {
               </div>
             )}
 
-            {/* ── PAYMENT SECTION ── */}
             {activeSection === 'payment' && (
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
@@ -369,7 +431,6 @@ const Profile = () => {
               </div>
             )}
 
-            {/* ── NOTIFICATIONS SECTION ── */}
             {activeSection === 'notifications' && (
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-50">
@@ -404,7 +465,6 @@ const Profile = () => {
               </div>
             )}
 
-            {/* ── PRIVACY SECTION ── */}
             {activeSection === 'privacy' && (
               <div className="space-y-5">
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">

@@ -10,10 +10,8 @@ const cryptoRoutes = require("./routes/cryptoRoutes");
 
 const app = express();
 
-// Connect to MongoDB
 connectDB();
 
-// Core middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -24,16 +22,13 @@ app.use(
   })
 );
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/crypto", cryptoRoutes);
 
-// Health check
 app.get("/", (req, res) => {
   res.json({ success: true, message: "Coinbase Clone API is running" });
 });
 
-// Global error handler (must be last)
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;

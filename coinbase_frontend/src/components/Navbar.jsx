@@ -3,13 +3,14 @@ import { Search, Globe, Menu, X, ChevronDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import NavigationDropdown from './NavigationDropdown';
 import { menus } from '../data/navigationMenu';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
     const [activeMenu, setActiveMenu] = useState(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [expandedMobileMenu, setExpandedMobileMenu] = useState(null);
+    const { user } = useAuth();
 
-    // Prevent scrolling when mobile menu is open
     useEffect(() => {
         if (isMobileMenuOpen) {
             document.body.style.overflow = 'hidden';
@@ -44,7 +45,6 @@ const Navbar = () => {
                     </div>
                 </div>
 
-                {/* Desktop Right Side */}
                 <div className="hidden lg:flex items-center gap-4" onMouseEnter={() => setActiveMenu(null)}>
                     <div className="p-2 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-300">
                         <Search size={16} strokeWidth={2.5} />
@@ -52,22 +52,49 @@ const Navbar = () => {
                     <div className="p-2 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-300">
                         <Globe size={16} strokeWidth={2.5} />
                     </div>
-                    <Link to="/login" className="bg-gray-100 text-black px-5 py-2.5 rounded-full text-[14px] font-bold hover:bg-gray-300 transition-all shadow-sm cursor-pointer inline-flex items-center justify-center">
-                        Sign in
-                    </Link>
-                    <Link to="/signup" className="bg-[#0052FF] text-white px-5 py-2.5 rounded-full text-[14px] font-bold hover:bg-blue-700 transition-all shadow-sm cursor-pointer inline-flex items-center justify-center">
-                        Sign up
-                    </Link>
+                    {user ? (
+                        <>
+                            <Link
+                                to="/dashboard"
+                                className="bg-gray-100 text-black px-5 py-2.5 rounded-full text-[14px] font-bold hover:bg-gray-300 transition-all shadow-sm cursor-pointer inline-flex items-center justify-center"
+                            >
+                                Dashboard
+                            </Link>
+                            <Link
+                                to="/profile"
+                                className="w-9 h-9 rounded-full bg-[#0052FF] flex items-center justify-center text-white text-[12px] font-bold hover:bg-[#1652F0] transition-colors"
+                            >
+                                {user.name ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) : 'CB'}
+                            </Link>
+                        </>
+                    ) : (
+                        <>
+                            <Link to="/login" className="bg-gray-100 text-black px-5 py-2.5 rounded-full text-[14px] font-bold hover:bg-gray-300 transition-all shadow-sm cursor-pointer inline-flex items-center justify-center">
+                                Sign in
+                            </Link>
+                            <Link to="/signup" className="bg-[#0052FF] text-white px-5 py-2.5 rounded-full text-[14px] font-bold hover:bg-blue-700 transition-all shadow-sm cursor-pointer inline-flex items-center justify-center">
+                                Sign up
+                            </Link>
+                        </>
+                    )}
                 </div>
 
-                {/* Mobile Right Side */}
                 <div className="flex lg:hidden items-center gap-3">
                     <div className="p-2 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200">
                         <Search size={20} strokeWidth={2.5} className="text-[#0A0B0D]" />
                     </div>
-                    <Link to="/signup" className="bg-[#0052FF] text-white px-5 py-2.5 rounded-full text-[14px] font-bold hover:bg-blue-700 transition-all shadow-sm cursor-pointer">
-                        Sign up
-                    </Link>
+                    {user ? (
+                        <Link
+                            to="/dashboard"
+                            className="bg-[#0052FF] text-white px-5 py-2.5 rounded-full text-[14px] font-bold hover:bg-blue-700 transition-all shadow-sm cursor-pointer"
+                        >
+                            Dashboard
+                        </Link>
+                    ) : (
+                        <Link to="/signup" className="bg-[#0052FF] text-white px-5 py-2.5 rounded-full text-[14px] font-bold hover:bg-blue-700 transition-all shadow-sm cursor-pointer">
+                            Sign up
+                        </Link>
+                    )}
                     <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200 text-[#0A0B0D]">
                         <Menu size={20} strokeWidth={2.5} />
                     </button>
@@ -76,7 +103,6 @@ const Navbar = () => {
 
             <NavigationDropdown activeMenu={activeMenu} />
 
-            {/* Mobile Menu Overlay */}
             {isMobileMenuOpen && (
                 <div className="fixed inset-0 z-[70] bg-white flex flex-col lg:hidden overflow-y-auto font-inter">
                     <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
@@ -132,12 +158,25 @@ const Navbar = () => {
                     </div>
 
                     <div className="px-6 py-8 border-t border-gray-100 flex flex-col gap-4 bg-gray-50 mt-auto">
-                        <Link to="/login" className="w-full bg-white text-black border border-gray-300 py-[18px] rounded-full text-[16px] font-bold text-center hover:bg-gray-50 transition-colors shadow-sm cursor-pointer" onClick={() => setIsMobileMenuOpen(false)}>
-                            Sign in
-                        </Link>
-                        <Link to="/signup" className="w-full bg-[#0052FF] text-white py-[18px] rounded-full text-[16px] font-bold text-center hover:bg-blue-700 transition-colors shadow-sm cursor-pointer" onClick={() => setIsMobileMenuOpen(false)}>
-                            Get started
-                        </Link>
+                        {user ? (
+                            <>
+                                <Link to="/dashboard" className="w-full bg-[#0052FF] text-white py-[18px] rounded-full text-[16px] font-bold text-center hover:bg-blue-700 transition-colors shadow-sm cursor-pointer" onClick={() => setIsMobileMenuOpen(false)}>
+                                    Go to Dashboard
+                                </Link>
+                                <Link to="/profile" className="w-full bg-white text-black border border-gray-300 py-[18px] rounded-full text-[16px] font-bold text-center hover:bg-gray-50 transition-colors shadow-sm cursor-pointer" onClick={() => setIsMobileMenuOpen(false)}>
+                                    My Profile
+                                </Link>
+                            </>
+                        ) : (
+                            <>
+                                <Link to="/login" className="w-full bg-white text-black border border-gray-300 py-[18px] rounded-full text-[16px] font-bold text-center hover:bg-gray-50 transition-colors shadow-sm cursor-pointer" onClick={() => setIsMobileMenuOpen(false)}>
+                                    Sign in
+                                </Link>
+                                <Link to="/signup" className="w-full bg-[#0052FF] text-white py-[18px] rounded-full text-[16px] font-bold text-center hover:bg-blue-700 transition-colors shadow-sm cursor-pointer" onClick={() => setIsMobileMenuOpen(false)}>
+                                    Get started
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

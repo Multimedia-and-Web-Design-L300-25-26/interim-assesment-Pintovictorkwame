@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowLeft, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -18,7 +18,7 @@ const AppleIcon = () => (
   </svg>
 );
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 3;
 
 const StepIndicator = ({ current, total }) => (
   <div className="flex items-center gap-1.5 mb-8">
@@ -26,7 +26,7 @@ const StepIndicator = ({ current, total }) => (
       <div
         key={i}
         className={`h-1 rounded-full transition-all duration-300 ${
-          i < current ? 'bg-[#0052FF]' : i === current - 1 ? 'bg-[#0052FF] flex-[2]' : 'bg-[#2D2E33]'
+          i < current ? 'bg-[#0052FF]' : 'bg-[#2D2E33]'
         } ${i === current - 1 ? 'flex-[2]' : 'flex-1'}`}
       />
     ))}
@@ -47,102 +47,9 @@ const getPasswordStrength = (pw) => {
   return { score, label: 'Strong', color: '#00D180' };
 };
 
-const PhoneInput = ({ value, onChange }) => {
-  const [country, setCountry] = useState('+1');
-  const countries = [
-    { code: '+1', flag: '🇺🇸', name: 'US' },
-    { code: '+44', flag: '🇬🇧', name: 'UK' },
-    { code: '+233', flag: '🇬🇭', name: 'GH' },
-    { code: '+49', flag: '🇩🇪', name: 'DE' },
-    { code: '+33', flag: '🇫🇷', name: 'FR' },
-    { code: '+91', flag: '🇮🇳', name: 'IN' },
-    { code: '+61', flag: '🇦🇺', name: 'AU' },
-    { code: '+81', flag: '🇯🇵', name: 'JP' },
-    { code: '+86', flag: '🇨🇳', name: 'CN' },
-    { code: '+55', flag: '🇧🇷', name: 'BR' },
-  ];
-
-  return (
-    <div className="flex gap-2">
-      <select
-        value={country}
-        onChange={(e) => setCountry(e.target.value)}
-        className="bg-[#1A1B1F] text-white border border-[#2D2E33] rounded-xl px-3 py-[18px] text-[15px] focus:outline-none focus:border-[#0052FF] transition-colors appearance-none w-[110px] cursor-pointer"
-      >
-        {countries.map((c) => (
-          <option key={c.code} value={c.code}>
-            {c.flag} {c.code}
-          </option>
-        ))}
-      </select>
-      <input
-        type="tel"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="Phone number"
-        className="flex-1 bg-[#1A1B1F] text-white border border-[#2D2E33] rounded-xl px-4 py-[18px] text-[16px] focus:outline-none focus:border-[#0052FF] transition-colors placeholder:text-[#5B616E]"
-      />
-    </div>
-  );
-};
-
-const OtpInput = ({ value, onChange }) => {
-  const inputs = useRef([]);
-  const digits = value.padEnd(6, '').split('').slice(0, 6);
-
-  const handleChange = (i, char) => {
-    const newDigits = [...digits];
-    newDigits[i] = char.replace(/\D/, '').slice(-1);
-    onChange(newDigits.join(''));
-    if (char && i < 5) inputs.current[i + 1]?.focus();
-  };
-
-  const handleKeyDown = (i, e) => {
-    if (e.key === 'Backspace' && !digits[i] && i > 0) {
-      inputs.current[i - 1]?.focus();
-      const newDigits = [...digits];
-      newDigits[i - 1] = '';
-      onChange(newDigits.join(''));
-    }
-  };
-
-  const handlePaste = (e) => {
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-    onChange(pasted.padEnd(6, '').slice(0, 6));
-    inputs.current[Math.min(pasted.length, 5)]?.focus();
-    e.preventDefault();
-  };
-
-  return (
-    <div className="flex gap-3 justify-between">
-      {digits.map((d, i) => (
-        <input
-          key={i}
-          ref={(el) => (inputs.current[i] = el)}
-          type="text"
-          inputMode="numeric"
-          maxLength={1}
-          value={d}
-          onChange={(e) => handleChange(i, e.target.value)}
-          onKeyDown={(e) => handleKeyDown(i, e)}
-          onPaste={i === 0 ? handlePaste : undefined}
-          className="w-full aspect-square max-w-[56px] bg-[#1A1B1F] text-white text-[22px] font-bold border border-[#2D2E33] rounded-xl text-center focus:outline-none focus:border-[#0052FF] transition-colors"
-        />
-      ))}
-    </div>
-  );
-};
-
 const SignupForm = () => {
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState({
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-    phone: '',
-    otp: '',
-  });
+  const [form, setForm] = useState({ email: '', password: '', firstName: '', lastName: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -151,7 +58,6 @@ const SignupForm = () => {
   const strength = getPasswordStrength(form.password);
 
   const set = (field) => (val) => setForm((f) => ({ ...f, [field]: val }));
-
   const next = () => { setError(''); setStep((s) => s + 1); };
   const back = () => { setError(''); setStep((s) => s - 1); };
 
@@ -170,24 +76,9 @@ const SignupForm = () => {
     next();
   };
 
-  const handleNameSubmit = (e) => {
+  const handleNameSubmit = async (e) => {
     e.preventDefault();
     if (!form.firstName.trim() || !form.lastName.trim()) return;
-    next();
-  };
-
-  const handlePhoneSubmit = (e) => {
-    e.preventDefault();
-    if (!form.phone.trim()) return;
-    next();
-  };
-
-  const handleOtpSubmit = async (e) => {
-    e.preventDefault();
-    if (form.otp.replace(/\D/g, '').length < 6) {
-      setError('Please enter the 6-digit code');
-      return;
-    }
     setError('');
     setLoading(true);
     try {
@@ -205,7 +96,6 @@ const SignupForm = () => {
     <div className="min-h-screen bg-[#0A0B0D] flex flex-col items-center justify-center font-inter p-6">
       <div className="w-full max-w-[440px] flex flex-col items-center">
 
-        {/* Logo */}
         <Link to="/" className="mb-8">
           <img
             src="/assets/clone-images/coinbaseLogoNavigation-4.svg"
@@ -216,7 +106,6 @@ const SignupForm = () => {
 
         <StepIndicator current={step} total={TOTAL_STEPS} />
 
-        {/* Step 1 — Email */}
         {step === 1 && (
           <div className="w-full">
             <h1 className="text-white text-[28px] md:text-[32px] font-semibold mb-2 text-center tracking-tight">
@@ -278,7 +167,6 @@ const SignupForm = () => {
           </div>
         )}
 
-        {/* Step 2 — Password */}
         {step === 2 && (
           <div className="w-full">
             <button onClick={back} className="flex items-center gap-2 text-[#5B616E] hover:text-white transition-colors mb-8 text-[14px] font-medium">
@@ -310,7 +198,6 @@ const SignupForm = () => {
                 </button>
               </div>
 
-              {/* Password strength */}
               {form.password && (
                 <div className="space-y-2">
                   <div className="flex gap-1">
@@ -356,7 +243,6 @@ const SignupForm = () => {
           </div>
         )}
 
-        {/* Step 3 — Name */}
         {step === 3 && (
           <div className="w-full">
             <button onClick={back} className="flex items-center gap-2 text-[#5B616E] hover:text-white transition-colors mb-8 text-[14px] font-medium">
@@ -388,67 +274,12 @@ const SignupForm = () => {
                 required
                 className="w-full bg-[#1A1B1F] text-white border border-[#2D2E33] rounded-xl px-4 py-[18px] text-[16px] focus:outline-none focus:border-[#0052FF] transition-colors placeholder:text-[#5B616E]"
               />
-              <button
-                type="submit"
-                disabled={!form.firstName.trim() || !form.lastName.trim()}
-                className="w-full bg-[#0052FF] text-white rounded-full py-[17px] text-[16px] font-bold hover:bg-[#1652F0] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Continue
-              </button>
-            </form>
-          </div>
-        )}
 
-        {/* Step 4 — Phone */}
-        {step === 4 && (
-          <div className="w-full">
-            <button onClick={back} className="flex items-center gap-2 text-[#5B616E] hover:text-white transition-colors mb-8 text-[14px] font-medium">
-              <ArrowLeft size={18} />
-              Back
-            </button>
-            <h1 className="text-white text-[28px] md:text-[32px] font-semibold mb-2 tracking-tight">
-              Add your phone number
-            </h1>
-            <p className="text-[#5B616E] text-[14px] mb-8">
-              We'll send a verification code to confirm your number.
-            </p>
-
-            <form onSubmit={handlePhoneSubmit} className="space-y-4">
-              <PhoneInput value={form.phone} onChange={set('phone')} />
-              <button
-                type="submit"
-                disabled={!form.phone.trim()}
-                className="w-full bg-[#0052FF] text-white rounded-full py-[17px] text-[16px] font-bold hover:bg-[#1652F0] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Send code
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* Step 5 — Phone OTP */}
-        {step === 5 && (
-          <div className="w-full">
-            <button onClick={back} className="flex items-center gap-2 text-[#5B616E] hover:text-white transition-colors mb-8 text-[14px] font-medium">
-              <ArrowLeft size={18} />
-              Back
-            </button>
-            <h1 className="text-white text-[28px] md:text-[32px] font-semibold mb-2 tracking-tight">
-              Check your phone
-            </h1>
-            <p className="text-[#5B616E] text-[14px] mb-8">
-              Enter the 6-digit code we sent to{' '}
-              <span className="text-white font-medium">{form.phone}</span>
-            </p>
-
-            <form onSubmit={handleOtpSubmit} className="space-y-6">
-              <OtpInput value={form.otp} onChange={set('otp')} />
-
-              {error && <p className="text-[#FF4019] text-[13px] text-center">{error}</p>}
+              {error && <p className="text-[#FF4019] text-[13px]">{error}</p>}
 
               <button
                 type="submit"
-                disabled={loading || form.otp.replace(/\D/g, '').length < 6}
+                disabled={loading || !form.firstName.trim() || !form.lastName.trim()}
                 className="w-full bg-[#0052FF] text-white rounded-full py-[17px] text-[16px] font-bold hover:bg-[#1652F0] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
@@ -457,17 +288,10 @@ const SignupForm = () => {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
-                    Verifying...
+                    Creating account...
                   </>
-                ) : 'Verify'}
+                ) : 'Create account'}
               </button>
-
-              <p className="text-center text-[14px] text-[#5B616E]">
-                Didn't receive it?{' '}
-                <button type="button" className="text-[#0052FF] hover:underline font-medium">
-                  Resend code
-                </button>
-              </p>
             </form>
           </div>
         )}

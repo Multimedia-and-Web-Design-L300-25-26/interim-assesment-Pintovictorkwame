@@ -1,9 +1,6 @@
 const User = require("../models/User");
 const generateToken = require("../utils/generateToken");
 
-// @desc    Register a new user
-// @route   POST /api/auth/register
-// @access  Public
 const registerUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
@@ -21,6 +18,8 @@ const registerUser = async (req, res, next) => {
 
     const user = await User.create({ name, email, password });
 
+    generateToken(res, user._id);
+
     res.status(201).json({
       success: true,
       message: "User registered successfully",
@@ -36,9 +35,6 @@ const registerUser = async (req, res, next) => {
   }
 };
 
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
 const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -77,9 +73,6 @@ const loginUser = async (req, res, next) => {
   }
 };
 
-// @desc    Logout user (clear cookie)
-// @route   POST /api/auth/logout
-// @access  Private
 const logoutUser = async (req, res, next) => {
   try {
     res.clearCookie("token", {
@@ -97,9 +90,6 @@ const logoutUser = async (req, res, next) => {
   }
 };
 
-// @desc    Get current user profile
-// @route   GET /api/auth/profile
-// @access  Private
 const getProfile = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id).select("-password");
@@ -123,4 +113,34 @@ const getProfile = async (req, res, next) => {
   }
 };
 
-module.exports = { registerUser, loginUser, logoutUser, getProfile };
+const makeAdmin = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+
+    if (user.role === "admin") {
+      return res.status(200).json({
+        success: true,
+        message: "User is already an admin",
+        user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      });
+    }
+
+    user.role = "admin";
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "User promoted to admin",
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { registerUser, loginUser, logoutUser, getProfile, makeAdmin };

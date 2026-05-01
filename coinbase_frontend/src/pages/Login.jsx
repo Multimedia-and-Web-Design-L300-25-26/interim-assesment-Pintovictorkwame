@@ -54,7 +54,6 @@ const Login = () => {
     <div className="min-h-screen bg-[#0A0B0D] flex flex-col items-center justify-center font-inter p-6">
       <div className="w-full max-w-[440px] flex flex-col items-center">
 
-        {/* Logo */}
         <Link to="/" className="mb-10">
           <img
             src="/assets/clone-images/coinbaseLogoNavigation-4.svg"
@@ -63,7 +62,6 @@ const Login = () => {
           />
         </Link>
 
-        {/* Step 1 — Email */}
         {step === 1 && (
           <div className="w-full">
             <h1 className="text-white text-[28px] md:text-[32px] font-semibold mb-8 text-center tracking-tight">
@@ -124,7 +122,6 @@ const Login = () => {
           </div>
         )}
 
-        {/* Step 2 — Password */}
         {step === 2 && (
           <div className="w-full">
             <button

@@ -5,12 +5,14 @@ const {
   getTopGainers,
   getNewestCoins,
   addCrypto,
+  seedCryptos,
 } = require("../controllers/cryptoController");
 const { protect, adminOnly } = require("../middleware/authMiddleware");
 
 // Specific named routes must come before parameterized routes
 router.get("/gainers", getTopGainers);
 router.get("/new", getNewestCoins);
+router.post("/seed", seedCryptos);
 
 router.get("/", getAllCrypto);
 router.post("/", protect, adminOnly, addCrypto);

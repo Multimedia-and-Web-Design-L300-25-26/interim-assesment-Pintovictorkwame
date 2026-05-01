@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
-  LayoutDashboard, BarChart2, ArrowLeftRight, Send, Gift,
-  Compass, TrendingUp, ChevronDown, LogOut, Settings,
+  BarChart2,
   Plus, ArrowUpRight, ArrowDownLeft, RefreshCw, Bell, Search,
 } from 'lucide-react';
 import { useAuth, API_BASE } from '../context/AuthContext';
+import DashboardSidebar from '../components/DashboardSidebar';
 
 const FALLBACK_CRYPTOS = [
   { name: 'Bitcoin', symbol: 'BTC', price: 65420.18, change24h: 2.34, image: '/assets/images/bitcoin.svg' },
@@ -42,110 +42,14 @@ const PortfolioChart = () => {
   );
 };
 
-const NavItem = ({ icon, label, active, onClick, to }) => {
-  const base = `flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium cursor-pointer transition-all w-full text-left`;
-  const cls = active
-    ? `${base} bg-[#0052FF]/10 text-[#0052FF]`
-    : `${base} text-[#888A8F] hover:bg-[#1A1B1F] hover:text-white`;
-  if (to) {
-    return (
-      <Link to={to} className={cls}>
-        <span className={active ? 'text-[#0052FF]' : 'text-[#5B616E]'}>{icon}</span>
-        {label}
-      </Link>
-    );
-  }
-  return (
-    <button onClick={onClick} className={cls}>
-      <span className={active ? 'text-[#0052FF]' : 'text-[#5B616E]'}>{icon}</span>
-      {label}
-    </button>
-  );
-};
-
-const Sidebar = ({ activeNav, setActiveNav, user, onLogout }) => {
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const initials = user?.name ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) : 'CB';
-
-  const navItems = [
-    { id: 'home', icon: <LayoutDashboard size={18} />, label: 'Home' },
-    { id: 'assets', icon: <BarChart2 size={18} />, label: 'Assets' },
-    { id: 'trade', icon: <ArrowLeftRight size={18} />, label: 'Trade' },
-    { id: 'pay', icon: <Send size={18} />, label: 'Pay' },
-    { id: 'earn', icon: <Gift size={18} />, label: 'Earn' },
-  ];
-
-  return (
-    <aside className="w-[240px] shrink-0 flex flex-col h-full bg-[#0A0B0D] border-r border-[#1A1B1F] px-3 py-4">
-      {/* Logo */}
-      <Link to="/" className="flex items-center gap-2 px-3 mb-6">
-        <img src="/assets/clone-images/coinbaseLogoNavigation-4.svg" alt="Coinbase" className="h-6 brightness-0 invert" />
-      </Link>
-
-      {/* Main nav */}
-      <nav className="flex flex-col gap-0.5 flex-1">
-        {navItems.map((item) => (
-          <NavItem
-            key={item.id}
-            icon={item.icon}
-            label={item.label}
-            active={activeNav === item.id}
-            onClick={() => setActiveNav(item.id)}
-          />
-        ))}
-
-        <div className="my-3 border-t border-[#1A1B1F]" />
-
-        <NavItem icon={<Compass size={18} />} label="Explore" to="/explore" />
-        <NavItem icon={<TrendingUp size={18} />} label="Advanced Trade" active={false} onClick={() => {}} />
-      </nav>
-
-      {/* User area */}
-      <div className="mt-4 border-t border-[#1A1B1F] pt-3">
-        <button
-          onClick={() => setUserMenuOpen(!userMenuOpen)}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#1A1B1F] transition-colors"
-        >
-          <div className="w-8 h-8 rounded-full bg-[#0052FF] flex items-center justify-center text-white text-[12px] font-bold shrink-0">
-            {initials}
-          </div>
-          <div className="flex-1 text-left min-w-0">
-            <p className="text-white text-[13px] font-semibold truncate">{user?.name || 'Account'}</p>
-            <p className="text-[#5B616E] text-[11px] truncate">{user?.email || ''}</p>
-          </div>
-          <ChevronDown size={14} className={`text-[#5B616E] transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
-        </button>
-
-        {userMenuOpen && (
-          <div className="mt-1 bg-[#1A1B1F] border border-[#2D2E33] rounded-xl overflow-hidden">
-            <Link
-              to="/profile"
-              className="flex items-center gap-3 px-4 py-3 text-[#888A8F] hover:text-white hover:bg-[#2D2E33] transition-colors text-[14px]"
-            >
-              <Settings size={16} />
-              Settings
-            </Link>
-            <button
-              onClick={onLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 text-[#888A8F] hover:text-[#FF4019] hover:bg-[#2D2E33] transition-colors text-[14px]"
-            >
-              <LogOut size={16} />
-              Sign out
-            </button>
-          </div>
-        )}
-      </div>
-    </aside>
-  );
-};
 
 const Dashboard = () => {
-  const [activeNav, setActiveNav] = useState('home');
   const [activePeriod, setActivePeriod] = useState('1D');
   const [cryptos, setCryptos] = useState([]);
   const [loadingCryptos, setLoadingCryptos] = useState(true);
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const [topGainers, setTopGainers] = useState([]);
+  const [loadingGainers, setLoadingGainers] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchCryptos = async () => {
@@ -166,20 +70,30 @@ const Dashboard = () => {
     fetchCryptos();
   }, []);
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
-
-  const topGainers = [...cryptos].sort((a, b) => b.change24h - a.change24h).slice(0, 4);
+  useEffect(() => {
+    const fetchGainers = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/crypto/gainers?limit=4`, { credentials: 'include' });
+        const data = await res.json();
+        if (data.success && data.data?.length > 0) {
+          setTopGainers(data.data);
+        } else {
+          setTopGainers([...FALLBACK_CRYPTOS].filter(c => c.change24h > 0).slice(0, 4));
+        }
+      } catch {
+        setTopGainers([...FALLBACK_CRYPTOS].filter(c => c.change24h > 0).slice(0, 4));
+      } finally {
+        setLoadingGainers(false);
+      }
+    };
+    fetchGainers();
+  }, []);
 
   return (
     <div className="flex h-screen bg-[#0A0B0D] font-inter overflow-hidden">
-      <Sidebar activeNav={activeNav} setActiveNav={setActiveNav} user={user} onLogout={handleLogout} />
+      <DashboardSidebar />
 
-      {/* Main content */}
       <main className="flex-1 overflow-y-auto bg-white">
-        {/* Top bar */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between">
           <div className="relative">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -204,7 +118,6 @@ const Dashboard = () => {
 
         <div className="px-8 py-8 max-w-[1100px]">
 
-          {/* Portfolio header */}
           <div className="mb-8">
             <p className="text-gray-500 text-[13px] font-medium mb-1 uppercase tracking-wider">Total balance</p>
             <div className="flex items-baseline gap-3 mb-1">
@@ -218,7 +131,6 @@ const Dashboard = () => {
             </p>
           </div>
 
-          {/* Quick actions */}
           <div className="flex gap-3 mb-8">
             {[
               { icon: <Plus size={18} />, label: 'Buy', color: 'bg-[#0052FF] text-white hover:bg-[#1652F0]' },
@@ -233,7 +145,6 @@ const Dashboard = () => {
             ))}
           </div>
 
-          {/* Chart */}
           <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-6 shadow-sm">
             <div className="flex items-center gap-2 mb-6">
               {TIME_PERIODS.map((p) => (
@@ -257,10 +168,8 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Two column layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            {/* Assets table - 2/3 width */}
             <div className="lg:col-span-2">
               <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
@@ -270,7 +179,6 @@ const Dashboard = () => {
                   </Link>
                 </div>
 
-                {/* Empty state */}
                 <div className="px-6 py-12 flex flex-col items-center text-center">
                   <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center mb-4">
                     <BarChart2 size={28} className="text-gray-300" />
@@ -284,16 +192,14 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Right column */}
             <div className="space-y-6">
 
-              {/* Market movers */}
               <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-50">
                   <h2 className="text-[15px] font-bold text-gray-900">Top gainers today</h2>
                 </div>
                 <div className="divide-y divide-gray-50">
-                  {loadingCryptos ? (
+                  {loadingGainers ? (
                     Array.from({ length: 4 }, (_, i) => (
                       <div key={i} className="px-5 py-3.5 flex items-center gap-3 animate-pulse">
                         <div className="w-8 h-8 rounded-full bg-gray-100" />
@@ -338,7 +244,6 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Verification card */}
               <div className="bg-[#0052FF]/5 border border-[#0052FF]/15 rounded-2xl p-5">
                 <p className="text-gray-900 font-semibold text-[15px] mb-1.5">Complete your profile</p>
                 <p className="text-gray-500 text-[13px] mb-4 leading-relaxed">
@@ -355,7 +260,6 @@ const Dashboard = () => {
 
           </div>
 
-          {/* Market overview */}
           <div className="mt-6 bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
               <h2 className="text-[16px] font-bold text-gray-900">Market overview</h2>

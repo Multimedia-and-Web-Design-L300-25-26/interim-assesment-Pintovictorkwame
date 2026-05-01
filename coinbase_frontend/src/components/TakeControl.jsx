@@ -24,7 +24,6 @@ const TakeControl = () => {
                 </div>
                 <div className="flex-1 w-full flex items-center justify-center relative">
                     <div className="w-full max-w-2xl aspect-square relative flex items-center justify-center">
-                        {/* Background decorative circles */}
                         <div className="absolute w-full h-full rounded-full border border-gray-50 opacity-50 animate-pulse"></div>
                         <div className="absolute w-[80%] h-[80%] rounded-full border border-gray-100"></div>
                         <div className="absolute w-[60%] h-[60%] rounded-full border border-gray-200"></div>
